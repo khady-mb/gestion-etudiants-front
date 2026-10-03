@@ -1,5 +1,5 @@
 // L'adresse de base de l API PHP
-const API_URL = 'index.php';
+const API_URL = 'https://localhost/projet_stage_back/index.php';
 
 // ==========================================
 // FONCTIONS UTILITAIRES
@@ -104,7 +104,39 @@ window.addEventListener('load', () => {
                 </tr>`;
             });
             html += '</tbody></table>';
-            
+            // --- RECHERCHE D'ÉTUDIANTS (POINT 9) ---
+    document.getElementById('btn-recherche').addEventListener('click', async () => {
+        const q = document.getElementById('recherche_input').value.trim();
+        const zoneResultat = document.getElementById('resultat-recherche-etudiant');
+
+        if (q === '') {
+            zoneResultat.innerHTML = '<p class="text-danger">Veuillez entrer un terme de recherche.</p>';
+            return;
+        }
+
+        try {
+            const reponse = await fetch(`${API_URL}?action=rechercher_etudiant&q=${encodeURIComponent(q)}`);
+            const etudiants = await reponse.json();
+
+            if (etudiants.length === 0) {
+                zoneResultat.innerHTML = '<p class="text-muted">Aucun étudiant trouvé.</p>';
+                return;
+            }
+
+            let html = '<table class="table table-striped table-hover"><thead><tr><th>Nom</th><th>Prénom</th><th>Email</th></tr></thead><tbody>';
+            etudiants.forEach(e => {
+                html += `<tr>
+                    <td>${e.nom}</td>
+                    <td>${e.prenom}</td>
+                    <td>${e.email}</td>
+                </tr>`;
+            });
+            html += '</tbody></table>';
+            zoneResultat.innerHTML = html;
+        } catch (erreur) {
+            zoneResultat.innerHTML = '<p class="text-danger">Erreur lors de la recherche.</p>';
+        }
+    });
             document.getElementById('resultat-liste').innerHTML = html;
         } catch (erreur) {
             document.getElementById('resultat-liste').innerHTML = '<p class="text-danger">Erreur lors du chargement.</p>';
